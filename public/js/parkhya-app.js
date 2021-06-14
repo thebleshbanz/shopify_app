@@ -744,6 +744,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _css_custom_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_css_custom_css__WEBPACK_IMPORTED_MODULE_0__);
 
 
+function addWishList() {
+  console.log('Adding Item Wishlist');
+}
+
+function removeWishList() {
+  console.log('Removed Item Wishlist');
+}
+
+var wishlistButton = document.querySelector(".parkhya-wishlist-btn");
+wishlistButton.addEventListener('click', function () {
+  console.log("This: ", this);
+});
+
 /***/ }),
 
 /***/ 1:
