@@ -38,7 +38,9 @@ class Status extends Component
      * Create the component instance.
      *
      * @param  string  $type
-     * @param  string  $message
+     * @param  string  $number
+     * @param  string  $title
+     * @param  string  $growth
      * @return void
      */
     public function __construct($type, $number, $title, $growth)

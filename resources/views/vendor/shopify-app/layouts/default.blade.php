@@ -6,6 +6,7 @@
 
         <title>{{ \Osiset\ShopifyApp\getShopifyConfig('app_name') }}</title>
         <link rel="stylesheet" type="text/css" href="{{ asset('css/app.css') }}">
+        <script defer src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
         @yield('styles')
     </head>
 
@@ -35,5 +36,6 @@
         @endif
 
         @yield('scripts')
+        <script type="text/javascript" src="{{ asset('js/app.js') }}" ></script>
     </body>
 </html>

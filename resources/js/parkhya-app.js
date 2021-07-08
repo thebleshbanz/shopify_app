@@ -45,14 +45,6 @@ function checkWishlist(customer, product_id){
 
 $(document).ready(function(){
 	var wishlistButton = $(document).find('.parkhya-wishlist-btn');
-	console.log(wishlistButton);
-
-	if (wishlistButton) {
-	    var customer = wishlistButton.data('customer');
-	    var id = wishlistButton.data('product');
-	    alert(customer, id);
-	    checkWishlist(customer,id);
-	}
 
 	$(document).on('click', '.parkhya-wishlist-btn', function(){
 		if($(this).hasClass('active')){
@@ -67,5 +59,13 @@ $(document).ready(function(){
 			addWishList(customer, product);
 		}
 	})
+
+	if (wishlistButton) {
+		console.log(wishlistButton);
+	    var customer = wishlistButton.data('customer');
+	    var id = wishlistButton.data('product');
+	    checkWishlist(customer,id);
+	}
+
 
 })

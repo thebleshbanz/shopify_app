@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Log;
 
 class ShopifyAppController extends Controller
 {
     public function index(Request $request){
-        dd(get_included_files ());
-        // random_code();
+        $shop = Auth::user();
+        $domain = $shop->getDomain()->toNative();
+        $shopApi = $shop->api()->rest('GET', '/admin/shop.json')['body']['shop'];
+
+        Log::info("Shop {$domain}'s object:" . json_encode($shop));
+        Log::info("Shop {$domain}'s API objct:" . json_encode($shopApi));
+        return;
     }
 }
