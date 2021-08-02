@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '664a5f77cd8be38f76705d464d2e1c8a0df24944',
+    'reference' => 'd74c805d423a7c85d4b8c93333fb9880bd9ad604',
     'name' => 'laravel/laravel',
   ),
   'versions' => 
@@ -512,7 +512,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '664a5f77cd8be38f76705d464d2e1c8a0df24944',
+      'reference' => 'd74c805d423a7c85d4b8c93333fb9880bd9ad604',
     ),
     'laravel/tinker' => 
     array (
@@ -863,8 +863,8 @@
     array (
       'provided' => 
       array (
-        0 => '1.0',
-        1 => '1.0.0',
+        0 => '1.0.0',
+        1 => '1.0',
       ),
     ),
     'psr/simple-cache' => 

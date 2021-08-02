@@ -31,85 +31,9 @@ Route::get('/login', function () {
 
 
 
-Route::middleware(['auth.shopify'])->group(function(){
+Route::middleware(['auth.shopify', 'billable'])->group(function(){
     
-    Route::get('shopify', 'ShopifyAppController@index');
-    
-    Route::get('/', function () {
-        $shop = Auth::user();
-        // check if shop data not stored
-        if($shop->shop_id === ''){
-            // store shop extra data to user table
-            $shop_api = $shop->api()->rest('GET', '/admin/api/2021-04/shop.json');
-            if(!$shop_api['errors']){
-                $shop_data = $shop_api['body']['container']['shop'];
-                $shop->shop_id          =   $shop_data['id'];
-                $shop->domain           =   $shop_data['domain'];
-                $shop->country          =   $shop_data['country'];
-                $shop->money_formate    =   $shop_data['money_format'];
-                $shop->primary_location_id =   $shop_data['primary_location_id'];
-                $shop->shop_json        =   json_encode($shop_data);
-                $shop->save();
-            }
-            // create a new template name wishlist on mail theme
-            // /admin/api/2021-04/themes.json
-            $themes = $shop->api()->rest('GET', '/admin/api/2021-04/themes.json')['body'];
-            // get Active Theme Id
-            $activeThemeId = '';
-            foreach ($themes['container']['themes'] as $theme) {
-                if($theme['role'] == 'main'){
-                    $activeThemeId = $theme['id'];
-                }
-            }
-            // snippet code which put in wishlist template liquid file.
-            $snippet = '
-                <div class="page-width">
-                    <div class="grid">
-                        <div class="grid__item medium-up--five-sixths medium-up--push-one-twelfth">
-                        <div class="section-header text-center">
-                            <h1>{{ page.title }}</h1>
-                        </div>
-
-                        <div class="rte">
-                            <ps-wishlist :shop_id="{{ shop.id }}" :customer_id=" {% if customer %} {{ customer.id }} {% else %} 0 {% endif %} " ></ps-wishlist>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-                ';
-
-            $array = ['asset' => ["key" => "templates/page.wishlist.liquid", "value" => $snippet ] ];
-            // PUT /admin/api/2021-04/themes/828155753/assets.json
-            $put_asset = $shop->api()->rest('PUT', '/admin/api/2021-04/themes/'.$activeThemeId.'/assets.json', $array );
-            // check put assests have no errors
-            if(!$put_asset['errors']){
-                $array = ['page' =>
-                    [
-                        "title" => "Wishlist", 
-                        "body_html" => "",
-                        "template_suffix" => "wishlist",
-                    ]
-                ];
-                $page = $shop->api()->rest('POST', '/admin/api/2021-04/pages.json', $array);
-                // if create page api response any error then show
-                if($page['errors']){
-                    dd($page);
-                }else{
-                    $pdata = $page['body']['container']['page'];
-                    $shop_page = new Pages;
-                    $shop_page->page_id = $pdata['id'];
-                    $shop_page->title   = $pdata['title'];
-                    $shop_page->shop_id = $pdata['shop_id'];
-                    $shop_page->handle  = $pdata['handle'];
-                    $shop_page->template_suffix  = $pdata['template_suffix'];
-                    $shop_page->save();
-                }
-            }
-        }
-
-        $setting = Setting::where('shop_id', $shop->name)->first();
-        return view('dashboard', compact('setting'));
-    })->name('home');
+    Route::get('/', 'ShopifyAppController@index' )->name('home');
     
     // Navbar Routing
     Route::view('/products', 'products')->name('products');
@@ -117,6 +41,9 @@ Route::middleware(['auth.shopify'])->group(function(){
     Route::view('/settings', 'settings')->name('settings');
 
     Route::get('wishlists', "WishlistController@index")->name('wishlists');
+    
+    // All customer who wishlisted products
+    Route::get('wishlist/customers', "CustomerController@index")->name('wishlist-customers');
 
     Route::get('configureTheme', 'SettingController@configureTheme')->name('configureTheme');
     
@@ -189,4 +116,34 @@ Route::middleware(['auth.shopify'])->group(function(){
         
         return $script_tag;
     }); */
+
+    // create a webhook for app uninstalled
+    // app/uninstalled
+    // /admin/api/2021-07/webhooks.json
+    /*Route::get('/create/webhook', function(){
+        $shop = Auth::user();
+        $url = 'https://parkhyamapps.co.in/shopify_app/webhook/ps-app-uninstalled';
+        $array = ['webhook' => ["topic" => "app/uninstalled", "address" => $url, "format"=>"json" ] ];
+        $webhook = $shop->api()->rest('POST', '/admin/api/2021-07/webhooks.json', $array);
+        
+        return $webhook;
+    });*/
+
+    // get all webhook
+    // /admin/api/2021-07/webhooks.json
+    /*Route::get('/webhooks', function(){
+        $shop = Auth::user();
+        $webhooks = $shop->api()->rest('GET', '/admin/api/2021-07/webhooks.json');
+        
+        return $webhooks;
+    });*/
+
+    // Delete webhook
+    // /admin/api/2021-07/webhooks/{webhook_id}.json
+    /*Route::get('/delete/webhook', function(){
+        $shop = Auth::user();
+        $webhook = $shop->api()->rest('DELETE', '/admin/api/2021-07/webhooks/1046082617528.json');
+        return $webhook;
+    });*/
+        
 });

@@ -18,8 +18,7 @@ class WishlistController extends Controller
     {
         $shop = Auth::user();
 
-        $shopWishlists = Wishlist::where('shop_id', $shop->name)->orderBy('updated_at', 'desc')->get();
-
+        $shopWishlists = Wishlist::where('shop_id', $shop->shop_id)->orderBy('updated_at', 'desc')->get();
 
         $lists = [];
 

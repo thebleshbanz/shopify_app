@@ -137,7 +137,7 @@ return [
     |
     */
 
-    'api_version' => env('SHOPIFY_API_VERSION', '2020-01'),
+    'api_version' => env('SHOPIFY_API_VERSION', '2021-07'),
 
     /*
     |--------------------------------------------------------------------------
@@ -170,7 +170,7 @@ return [
     |
     */
 
-    'api_scopes' => env('SHOPIFY_API_SCOPES', 'read_products,write_products,read_themes,write_themes,read_orders,read_customers'),
+    'api_scopes' => env('SHOPIFY_API_SCOPES', 'read_products,write_products,read_themes,write_themes,read_orders,read_customers,read_script_tags,write_script_tags,write_content'),
 
     /*
     |--------------------------------------------------------------------------
@@ -305,13 +305,10 @@ return [
     */
 
     'webhooks' => [
-        /*
-            [
-                'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'orders/create'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://some-app.com/webhook/orders-create')
-            ],
-            ...
-        */
+        [
+            'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'app/uninstalled'),
+            'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', env('APP_URL') .'webhook/app-uninstalled')
+        ],  
     ],
 
     /*
@@ -324,14 +321,11 @@ return [
     */
 
     'scripttags' => [
-        /*
-            [
-                'src' => env('SHOPIFY_SCRIPTTAG_1_SRC', 'https://some-app.com/some-controller/js-method-response'),
-                'event' => env('SHOPIFY_SCRIPTTAG_1_EVENT', 'onload'),
-                'display_scope' => env('SHOPIFY_SCRIPTTAG_1_DISPLAY_SCOPE', 'online_store')
-            ],
-            ...
-        */
+        [
+            'src' => env('SHOPIFY_SCRIPTTAG_1_SRC', env('APP_URL') . 'public/scripttags/parkhya-app.js'),
+            'event' => env('SHOPIFY_SCRIPTTAG_1_EVENT', 'onload'),
+            'display_scope' => env('SHOPIFY_SCRIPTTAG_1_DISPLAY_SCOPE', 'online_store')
+        ],
     ],
 
     /*

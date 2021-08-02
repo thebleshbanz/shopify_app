@@ -1,7 +1,45 @@
+
+import "../css/custom.css";
+
+import "toastr";
+
+import Vue from "vue";
+window.Vue = Vue;
+// import vuex instance
+// import store from "./store/index.js";
+
+// Vue.config.productionTip = false
+// use vuex in vue instance
+// Vue.use(store)
+
+let axios = require('axios');
+window.axios = axios;
+
+let jQuery = require('jquery');
+window.jQuery = jQuery;
+
 import "../css/custom.css";
 import "toastr";
 
-window.axios = require('axios');
+/* Polaris Vue start */
+import PolarisVue from '@eastsideco/polaris-vue';
+
+// Recommended: import the correct CSS for the version of Polaris the library uses.
+import '@eastsideco/polaris-vue/lib/polaris-vue.css';
+
+// Register the plugin with Vue
+Vue.use(PolarisVue);
+
+
+// Vue Components
+// Vue.component('app-entry', require('./App.vue').default);
+// Vue.component('ps-wishlist-btn', require('./components/WishlistBtn').default);
+// Vue.component('ps-wishlist', require('./components/Wishlist').default);
+
+new window.Vue({
+	el: '#app',
+	delimiters: ['${', '}'],
+});
 
 const appDomain = "https://parkhyamapps.co.in/shopify_app";
 
