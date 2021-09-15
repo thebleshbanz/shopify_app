@@ -4,14 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Wishlist extends Model
+class Cart extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'wishlists';
+    protected $table = 'carts';
     
     /**
      * The attributes that are mass assignable.
@@ -19,7 +19,7 @@ class Wishlist extends Model
      * @var array
      */
     protected $fillable = [
-        'shop_id', 'customer_id', 'session_id', 'product_id',
+        'shop_id', 'customer_id', 'product_id',
     ];
     /**
      * The attributes that should be hidden for arrays.

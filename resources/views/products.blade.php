@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container mx-auto">
-
+        
         <div class="bg-gray-50">
             <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
                 <div class="mt-8 flex justify-between">
@@ -15,17 +15,17 @@
                     </div>
 
                     <div class="w-56">
-                        <img src="/img/wishlist-header.svg" alt="">
+                        <!-- <img src="/img/wishlist-header.svg" alt=""> -->
                     </div>
 
                 </div>
 
 
             </div>
-          </div>
+        </div>
 
 
-        <div x-data="{ loading: true }" class="mt-4" x-init="axios.get('https://parkhyamapps.co.in/shopify_app/wishlists')
+        <div x-data="{ loading: true, open:false, progress: false }" class="mt-4" x-init="axios.get('https://parkhyamapps.co.in/shopify_app/wishlists')
                     .then(function(response) {
                         $refs.productTable.innerHTML =  response.data;
                         console.log(response)
@@ -34,7 +34,11 @@
                         console.log('ERROR:', error)
                     });
         ">
+            <!-- display list of products -->
             <div x-ref="productTable"></div>
+            
+            <!-- display list of products wishlisted customers -->
+            @include('partials.customers-modal')
         </div>
     </div>
 @endsection

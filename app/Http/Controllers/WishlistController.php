@@ -18,9 +18,14 @@ class WishlistController extends Controller
     {
         $shop = Auth::user();
 
-        $shopWishlists = Wishlist::where('shop_id', $shop->shop_id)->orderBy('updated_at', 'desc')->get();
-
+        $shopWishlists = Wishlist::where('shop_id', $shop->shop_id)
+                                    ->where('customer_id', '!=', '0')
+                                    ->groupBy('product_id')
+                                    ->orderBy('updated_at', 'desc')
+                                    ->get();
         $lists = [];
+        
+        $products = [];
 
         foreach($shopWishlists as $item){
             if($item->product_id){
@@ -29,7 +34,6 @@ class WishlistController extends Controller
         }
         
         $mylist = json_encode($lists);
-
 
         $query = "
             {
@@ -54,16 +58,85 @@ class WishlistController extends Controller
                 }
             }
         ";
+// echo $query;die;
+        $response = $shop->api()->graph($query);
 
-        $products = $shop->api()->graph($query);
+        if(!empty($response)){
+            $data = $response['body']->container['data']['nodes'];
+            foreach($data as $value){
+                $product_id = last(explode('/', $value['id']));
+                $row = [];
+                $row['store'] = $value;
+                $row['count'] = Wishlist::where('shop_id', $shop->shop_id)->where('customer_id', '!=', '0')->where('product_id', $product_id)->count();
+                $products[] = $row;
+            }
+        }
 
-        return view('partials.wishlist-table', compact('products'));
+        return view('admin.products', compact('products'));
+        // return view('partials.wishlist-table', compact('products'));
     }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+    public function ownWishlistTest(Request $request)
+    {
+        $result = [];
+        $post = $request->all();
+        // dd($post);
+        $shop_id      = isset($post['shop_id']) ? $post['shop_id'] : '';
+        $customer_id  = isset($post['customer_id']) ? $post['customer_id'] : 0;
+        $session_id   = isset($post['session_id']) ? $post['session_id'] : '';
+        $title        = isset($post['title']) ? $post['title'] : '';
+        
+        $shop = User::where('shop_id', $shop_id)->first();
+        
+        $shopWishlists  = Wishlist::where('shop_id', $shop_id)
+                            ->where('customer_id', $customer_id)
+                            ->where('session_id', $session_id)
+                            ->orderBy('updated_at', 'desc')
+                            ->get();
+        // dd($shopWishlists);
+        if(count($shopWishlists) != 0 ){
+            $lists = [];
+            foreach($shopWishlists as $item){
+                if($item->product_id){
+                    array_push($lists, $item->product_id);
+                }
+            }
+            
+            if(count($lists) != 0){
+                //  /admin/api/2021-07/products.json
+                $pera = ['ids' => implode(',',$lists)];
+
+                if($title != ''){
+                    $pera['handle'] = $title;
+                }
+                // dd($pera);
+                $products = $shop->api()->rest('GET', '/admin/api/2021-07/products.json', $pera);
+    
+                dd($products);
+                if(!empty($products)){
+                    $result = ['status'=>true, 'code'=>200, 'data'=>$products];
+                }else{
+                    $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+                }
+            }else{
+                $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+            }
+
+        }else{
+            $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+        }
+        return $result;
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    // backup of function on 2021-08-05 dev@ashish
     public function ownWishlist(Request $request)
     {
         $result = [];
@@ -75,6 +148,100 @@ class WishlistController extends Controller
         $shop = User::where('shop_id', $shop_id)->first();
         
         $shopWishlists  = Wishlist::where('shop_id', $shop_id)->where('customer_id', $customer_id)->where('session_id', $session_id)->orderBy('updated_at', 'desc')->get();
+
+        if(count($shopWishlists) != 0 ){
+            $lists = [];
+            foreach($shopWishlists as $item){
+                if($item->product_id){
+                    array_push($lists, "gid://shopify/Product/{$item->product_id}");
+                }
+            }
+            
+            if(count($lists) != 0){
+                $mylist = json_encode($lists);
+                // dd($mylist);
+                $query = "
+                    {
+                        nodes(ids:  $mylist ) {
+                        ... on Product {
+                                id
+                                title
+                                handle
+                                featuredImage {
+                                    originalSrc
+                                }
+                                totalInventory
+                                vendor
+                                onlineStorePreviewUrl
+                                priceRange {
+                                    maxVariantPrice {
+                                        amount
+                                        currencyCode
+                                    }
+                                    minVariantPrice {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+                                priceRangeV2 {
+                                    maxVariantPrice {
+                                        amount
+                                        currencyCode
+                                    }
+                                    minVariantPrice {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+                                variants(first: 10) {
+                                    edges {
+                                        node {
+                                            id
+                                            title
+                                            price
+                                            compareAtPrice
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ";
+    
+                $products = $shop->api()->graph($query);
+                if(!empty($products)){
+                    $result = ['status'=>true, 'code'=>200, 'data'=>$products];
+                }else{
+                    $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+                }
+            }else{
+                $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+            }
+
+        }else{
+            $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+        }
+        return $result;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function customerProducts(Request $request)
+    {
+        $result     = [];
+        $products   = [];
+        $post = $request->all();
+        $customer_id  = isset($post['customer_id']) ? $post['customer_id'] : 0;
+        
+        $shop = Auth::user();
+        
+        $shopWishlists  = Wishlist::where('shop_id', $shop->shop_id)
+                            ->where('customer_id', $customer_id)
+                            ->orderBy('updated_at', 'desc')
+                            ->get();
 
         if(count($shopWishlists) != 0 ){
             $lists = [];
@@ -118,20 +285,23 @@ class WishlistController extends Controller
                     }
                 ";
     
-                $products = $shop->api()->graph($query);
-                if(!empty($products)){
-                    $result = ['status'=>true, 'code'=>200, 'data'=>$products];
-                }else{
-                    $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+                $response = $shop->api()->graph($query);
+                
+                if(!empty($response)){
+                    $data = $response['body']->container['data']['nodes'];
+                    foreach($data as $value){
+                        $product_id = last(explode('/', $value['id']));
+                        $row = [];
+                        $row['store'] = $value;
+                        $row['count'] = Wishlist::where('shop_id', $shop->shop_id)->where('customer_id', '!=', '0')->where('product_id', $product_id)->count();
+                        $products[] = $row;
+                    }
                 }
-            }else{
-                $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
             }
 
-        }else{
-            $result = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
         }
-        return $result;
+        
+        return view('partials.customer-products-table', compact('products'));
     }
 
     public function syncWishlist(Request $request){
@@ -239,8 +409,8 @@ class WishlistController extends Controller
                             ->where('product_id', $product_id)
                             ->first();
         
-        $res = Wishlist::destroy($item->id);
-        if($res){
+        if($item){
+            $res = Wishlist::destroy($item->id);
             $data = ['status'=>true, 'code'=>200, 'data'=>$item];
         }else{
             $data = ['status'=>false, 'code'=>404, 'msg'=>'data not found'];

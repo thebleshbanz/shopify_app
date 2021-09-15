@@ -43,5 +43,13 @@ Route::post('/checkWishlist', 'WishlistController@check');
 
 // get customer wishlist
 Route::post('/ownWishlist', 'WishlistController@ownWishlist');
+
+// get customer wishlist test
+Route::post('/testWishlist', 'WishlistController@ownWishlistTest');
 //  sync customer wishlist
 Route::post('/sync-wishlist', 'WishlistController@syncWishlist');
+
+Route::post('/shop/settings', 'SettingController@shop')->name('shop.settings');
+
+// add to cart
+Route::post('/addToCart', 'ShopifyAppController@addToCart' )->name('add_cart');

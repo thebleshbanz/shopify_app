@@ -50,11 +50,9 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-
         if ($exception instanceof MissingShopDomainException) {
             return Redirect::secure('login');
         }
-
         return parent::render($request, $exception);
     }
 }

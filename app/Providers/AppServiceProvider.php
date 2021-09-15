@@ -28,5 +28,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Blade::component('package-alert', Alert::class);
         Blade::component('package-status', Status::class);
+        \Debugbar::disable();
     }
 }

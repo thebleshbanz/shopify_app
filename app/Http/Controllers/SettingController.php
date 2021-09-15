@@ -6,6 +6,7 @@ use App\Setting;
 use App\Models\Pages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SettingController extends Controller
 {
@@ -43,7 +44,7 @@ class SettingController extends Controller
 
         $array = ['asset' => ["key" => "templates/page.wishlist.liquid", "value" => $snippet ] ];
         // PUT /admin/api/2021-04/themes/828155753/assets.json
-        $put_asset = $shop->api()->rest('PUT', '/admin/api/2021-04/themes/'.$activeThemeId.'/assets.json', $array );
+        $put_asset = $shop->api()->rest('PUT', '/admin/api/2021-07/themes/'.$activeThemeId.'/assets.json', $array );
 
         Setting::updateOrCreate(
             ['shop_id' => $shop->name],
@@ -69,7 +70,7 @@ class SettingController extends Controller
                         "template_suffix" => "wishlist",
                     ]
                 ];
-        $response = $shop->api()->rest('POST', '/admin/api/2021-04/pages.json', $array);
+        $response = $shop->api()->rest('POST', '/admin/api/2021-07/pages.json', $array);
         if(!$response['errors']){
             $pdata = $response['body']['container']['page'];
             $shop_page = new Pages;
@@ -89,9 +90,40 @@ class SettingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($user_id)
     {
-        //
+        $shop_id = Auth::user()->shop_id;
+        // Will return a ModelNotFoundException if no user with that id
+        try
+        {
+            $setting = Setting::where('shop_id', $shop_id)->first();
+        }
+        // catch(Exception $e) catch any exception
+        catch(ModelNotFoundException $e)
+        {
+            // dd(get_class_methods($e)); // lists all available methods for exception object
+            // dd($e);
+            $setting = '';
+        }
+        
+        return view('settings', compact('setting'));
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function shop(Request $request)
+    {
+        $shop_id = $request->input('shop_id');
+        $shop = Setting::where('shop_id', $shop_id)->first();
+        if($shop){
+            return ['status'=>true, 'code'=>200, 'data'=>$shop];
+        }else{
+            return ['status'=>false, 'code'=>404, 'msg'=>'data not found'];
+        }
     }
 
     /**
@@ -144,9 +176,27 @@ class SettingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Setting $setting)
     {
-        //
+        $post = $request->all();
+        $setting->activated               = isset($post['activated']) ? 1 : 0;
+        $setting->redirect_product_page   = isset($post['redirect_product_page']) ? 1 : 0;
+        $setting->disable_guests          = isset($post['disable_guests']) ? 1 : 0;
+        $setting->wishlist_btn_size       = isset($post['wishlist_btn_size']) ? 1 : 0;
+        $setting->wishlist_btn_color      = isset($post['wishlist_btn_color']) ? $post['wishlist_btn_color'] : '';
+        $setting->is_heart_icon           = isset($post['is_heart_icon']) ? 1 : 0;
+        $setting->is_wishlist_collection  = isset($post['is_wishlist_collection']) ? 1 : 0;
+        $setting->share_social_media      = isset($post['share_social_media']) ? 1 : 0;
+        $setting->reminder_mail           = isset($post['reminder_mail']) ? 1 : 0;
+        $setting->mail_recursive_days     = isset($post['mail_recursive_days']) ? $post['mail_recursive_days'] : '';
+        $setting->wishlist_label_btn      = isset($post['wishlist_label_btn']) ? $post['wishlist_label_btn'] : '';
+        $res = $setting->save();
+        return redirect()->back();
+        /* if($res){
+            return redirect(route('settings', ['shop_id'=>$setting->shop_id ] ))->with('success', __('The Setting has been successfully updated'));
+        }else{
+            return redirect(route('settings', ['shop_id'=>$setting->shop_id ] ))->with('fail', __('Something went wrong'));
+        } */
     }
 
     /**
