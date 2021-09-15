@@ -32,7 +32,9 @@ class SettingController extends Controller
                             </div>
 
                             <div class="rte">
-                                <ps-wishlist :customer_id=" {% if customer %} {{ customer.id }} {% else %} 0 {% endif %} " ></ps-wishlist>
+                                <div id="ps-wishlist-page">
+                                    <ps-wishlist :customer_id=" {% if customer %} {{ customer.id }} {% else %} 0 {% endif %} " ></ps-wishlist>
+                                </div>
                             </div>
                             </div>
                         </div>
